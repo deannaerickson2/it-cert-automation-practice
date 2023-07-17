@@ -1,0 +1,35 @@
+#don't forget to add shebang line and modify line 27
+
+import os
+import requests
+
+# Specify the path to the feedback directory
+feedback_directory = "/data/feedback"
+
+# Create an empty list to store the feedback dictionaries
+feedback_list = []
+
+# Iterate over each .txt file in the feedback directory
+for filename in os.listdir(feedback_directory):
+    if filename.endswith(".txt"):
+        feedback_path = os.path.join(feedback_directory, filename)
+        with open(feedback_path, "r") as file:
+            lines = file.readlines()
+            feedback_dict = {
+                "title": lines[0].strip(),
+                "name": lines[1].strip(),
+                "date": lines[2].strip(),
+                "feedback": lines[3].strip(),
+            }
+            feedback_list.append(feedback_dict)
+
+# Define the URL to post the feedback data
+url = "http://<corpweb-external-IP>/feedback"  # Replace <corpweb-external-IP> with the actual IP address
+
+# Iterate over the feedback list and make a POST request for each feedback
+for feedback in feedback_list:
+    response = requests.post(url, json=feedback)
+    if response.status_code == 201:
+        print("Feedback submitted successfully!")
+    else:
+        print(f"Error submitting feedback. Status code: {response.status_code}, Error message: {response.text}")
